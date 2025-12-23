@@ -36,3 +36,19 @@ def quantum_spin_one_reel_biased(theta: float, shots: int = 1) -> str:
     job = backend.run(qc, shots=shots, memory=True)
     result = job.result().get_memory()[0]
     return result
+
+def quantum_spin_counts_one_reel_biased(theta: float, shots: int = 200) -> dict:
+    """
+    Run the 1-qubit biased spin for many shots and return counts, e.g. {'0': 83, '1': 117}.
+    """
+    qc = QuantumCircuit(1, 1)
+    qc.ry(theta, 0)
+    qc.measure(0, 0)
+
+    backend = AerSimulator()
+    job = backend.run(qc, shots=shots)
+    counts = job.result().get_counts(qc)
+    # Ensure both keys exist
+    counts.setdefault('0', 0)
+    counts.setdefault('1', 0)
+    return counts
