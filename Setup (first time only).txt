@@ -29,6 +29,7 @@ pip install plotly
 2) ModuleNotFoundError: No module named 'qiskit_aer'
 pip install qiskit-aer
 
+
 Team workflow (GitHub)
 
 We use GitHub as the shared workspace:

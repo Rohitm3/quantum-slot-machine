@@ -11,9 +11,10 @@ from qiskit_aer import AerSimulator
 
 @dataclass
 class SpinResult:
-    reel_bits: List[str]      # e.g. ["010", "111", "001"]
-    reels: List[str]          # e.g. ["🍊", "7️⃣", "🍋"]
-    circuit: QuantumCircuit   # circuit used for the spin
+    reel_bits: List[str]
+    reels: List[str]
+    circuit: QuantumCircuit
+    oracle_flag: Optional[str] = None  # '0' or '1' (only in oracle mode)
 
 
 class QuantumSlotMachine:
@@ -37,6 +38,7 @@ class QuantumSlotMachine:
         self.qubits_per_reel = qubits_per_reel
         self.total_qubits = n_reels * qubits_per_reel
         self.entangle = entangle
+        self.oracle_symbols = {0: "🍒", 1: "💎"}
 
         self.backend = AerSimulator()
 
@@ -149,7 +151,6 @@ class QuantumSlotMachine:
 
         # any two match
         if a == b or b == c or a == c:
-            # find the matched symbol
             if a == b:
                 sym = a
             elif b == c:
@@ -157,7 +158,77 @@ class QuantumSlotMachine:
             else:
                 sym = a
             base = self.base_payouts.get(sym, 10)
-            # smaller than triple reward
             return "double", max(base // 2, 5)
 
         return "none", 0
+
+    def run_spin_with_oracle_demo(
+        self,
+        theta_base: float = math.pi / 2,
+        variation_pct: float = 0.0,
+    ) -> SpinResult:
+        """
+        ORACLE DEMO MODE (Beginner-friendly):
+          - 3 reels = 3 qubits (1 qubit per reel)
+          - ancilla qubit 'win_flag' = 1 iff all three reels match (000 or 111)
+          - reels are still measured normally, plus the oracle flag is measured.
+        """
+
+        reel_qubits = 3
+        flag = 3
+        total_qubits = 4
+
+        qc = QuantumCircuit(total_qubits, total_qubits)
+
+        # 1) Superposition + Bias
+        for q in range(reel_qubits):
+            qc.h(q)
+        qc.barrier(label="H")
+
+        for q in range(reel_qubits):
+            if variation_pct > 0:
+                delta = np.random.uniform(
+                    -theta_base * variation_pct / 100,
+                    theta_base * variation_pct / 100
+                )
+                theta = float(np.clip(theta_base + delta, 0.0, math.pi))
+            else:
+                theta = float(theta_base)
+            qc.ry(theta, q)
+        qc.barrier(label="RY")
+
+        # 2) ORACLE: set flag=1 iff q0 == q1 == q2
+        qc.cx(0, 1)
+        qc.cx(0, 2)
+        qc.x(1)
+        qc.x(2)
+        qc.ccx(1, 2, flag)
+        qc.x(1)
+        qc.x(2)
+        qc.cx(0, 1)
+        qc.cx(0, 2)
+        qc.barrier(label="Oracle: all-equal flag")
+
+        # 3) Measurement
+        qc.measure(range(total_qubits), range(total_qubits))
+
+        job = self.backend.run(qc, shots=1, memory=True)
+        raw = job.result().get_memory()[0]
+        bitstring = raw[::-1]
+
+        reel_bits = [bitstring[0], bitstring[1], bitstring[2]]
+        reels = [self.oracle_symbols[int(b)] for b in reel_bits]
+        oracle_flag = bitstring[3]
+
+        return SpinResult(
+            reel_bits=reel_bits,
+            reels=reels,
+            circuit=qc,
+            oracle_flag=oracle_flag
+        )
+
+    def oracle_demo_payout(self, oracle_flag: str) -> int:
+        """Simple payout rule for oracle demo."""
+        return 50 if oracle_flag == "1" else 0
+
+

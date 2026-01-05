@@ -20,6 +20,9 @@ if "last_bits" not in st.session_state:
     st.session_state.last_bits = ["000", "000", "000"]
 if "last_message" not in st.session_state:
     st.session_state.last_message = ""
+if "last_oracle_flag" not in st.session_state:
+    st.session_state.last_oracle_flag = None
+    
 
 # Quantum machine (simple + explainable)
 quantum_slot = QuantumSlotMachine(n_reels=3, qubits_per_reel=3, entangle=True)
@@ -50,6 +53,7 @@ with st.sidebar:
     )
 
     variation_pct = st.slider("Variation (%)", 0, 50, 10, 5)
+    oracle_mode = st.checkbox("Oracle Demo Mode (3 reels, 1 qubit each)", value=True)
 
     st.markdown("---")
     st.markdown("## 📊 Stats")
@@ -82,6 +86,12 @@ with col3:
 
 if st.session_state.last_message:
     st.success(st.session_state.last_message)
+if oracle_mode and st.session_state.last_bits != ["000", "000", "000"]:
+    # In oracle mode, bits are 1-bit strings, so display them clearly
+    st.info("Oracle Demo Mode is ON (win flag is shown after spin).")
+if oracle_mode and st.session_state.last_oracle_flag is not None:
+    st.info(f"Oracle flag (win qubit) = {st.session_state.last_oracle_flag}  (1 means WIN)")
+   
 
 spin = st.button(
     "🎰 QUANTUM SPIN (10 credits)",
@@ -94,8 +104,18 @@ if spin:
     if not st.session_state.game.place_bet():
         st.warning("Not enough credits.")
     else:
-        spin_result = quantum_slot.run_spin(theta_base=theta_base, variation_pct=variation_pct)
-        win_type, payout = quantum_slot.check_win(spin_result.reels)
+        if oracle_mode:
+            spin_result = quantum_slot.run_spin_with_oracle_demo(theta_base=theta_base, variation_pct=variation_pct)
+            st.session_state.last_oracle_flag = spin_result.oracle_flag
+            payout = quantum_slot.oracle_demo_payout(spin_result.oracle_flag)
+            win_type = "oracle_jackpot" if payout > 0 else "none"            
+
+        else:
+            spin_result = quantum_slot.run_spin(theta_base=theta_base, variation_pct=variation_pct)
+            st.session_state.last_oracle_flag = None
+
+            win_type, payout = quantum_slot.check_win(spin_result.reels)
+
 
         # update state
         st.session_state.last_reels = spin_result.reels
