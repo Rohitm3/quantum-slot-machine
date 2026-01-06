@@ -1,60 +1,74 @@
-import streamlit as st
 import math
+import streamlit as st
 import pandas as pd
-
+import time
 from quantum_logic import QuantumSlotMachine
 from game_logic import GameState
 
+# page config
 st.set_page_config(page_title="Quantum Slot Machine", page_icon="🎰", layout="wide")
 
-# -----------------------
-# Session state
-# -----------------------
+st.markdown("""
+<style>
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+
+.reel-card {
+    background: linear-gradient(145deg, #1f2933, #111827);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    font-size: 80px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.25);
+}
+
+.jackpot { 
+    box-shadow: 0 0 35px rgba(255,215,0,0.9) !important; 
+    transform: scale(1.1);
+}
+
+.stButton>button {
+    font-size:48px; font-weight:900; text-transform:uppercase;
+    padding:25px 0; border-radius:25px;
+    border:6px solid gold; 
+    color: white !important; /* Force text to stay white */
+    background-color: red !important; /* Force background to stay red */
+    width:100%;
+}
+
+.stButton>button:active, .stButton>button:focus, .stButton>button:hover {
+    color: white !important;
+    background-color: #ff0000 !important;
+    border: 6px solid gold !important;
+    opacity: 1 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# saving the game states
 if "game" not in st.session_state:
-    st.session_state.game = GameState(starting_credits=100, bet_amount=10)
+    st.session_state.game = GameState()
 if "history" not in st.session_state:
     st.session_state.history = []
 if "last_reels" not in st.session_state:
-    st.session_state.last_reels = ["🍒", "🍒", "🍒"]
-if "last_bits" not in st.session_state:
-    st.session_state.last_bits = ["000", "000", "000"]
+    st.session_state.last_reels = ["🍒","🍒","🍒"]
 if "last_message" not in st.session_state:
     st.session_state.last_message = ""
-if "last_oracle_flag" not in st.session_state:
-    st.session_state.last_oracle_flag = None
-    
+if "last_win_type" not in st.session_state:
+    st.session_state.last_win_type = None
 
-# Quantum machine (simple + explainable)
-quantum_slot = QuantumSlotMachine(n_reels=3, qubits_per_reel=3, entangle=True)
+# introducing the quantum_logic
+quantum_slot = QuantumSlotMachine()
+all_symbols = ["🍒","🍋","🍊","🍇","🔔","⭐","💎","7️⃣"]
 
-# -----------------------
-# Header
-# -----------------------
-st.markdown(
-    "<h1 style='text-align:center;'>⚛️ Quantum Slot Machine 🎰</h1>",
-    unsafe_allow_html=True
-)
-st.write("Reels are produced by a quantum circuit: superposition (H), bias (RY), optional entanglement (CNOT), then measurement.")
-
-st.markdown("---")
-
-# -----------------------
-# Sidebar controls
-# -----------------------
+# sidebar for the quantum sliders
 with st.sidebar:
-    st.markdown("## ⚙️ Settings")
-
-    theta_base = st.slider(
-        "Bias θ (radians)",
-        min_value=0.0,
-        max_value=float(math.pi),
-        value=float(math.pi/2),
-        step=0.05
-    )
-
+    st.markdown("## ⚙️ Quantum Controls")
+    angle_val = st.slider("Bias (θ)", 0.0, float(math.pi), float(math.pi/2), 0.05)
     variation_pct = st.slider("Variation (%)", 0, 50, 10, 5)
-    oracle_mode = st.checkbox("Oracle Demo Mode (3 reels, 1 qubit each)", value=True)
-
+    oracle_mode = st.checkbox("Oracle Demo Mode", value=True)
+    
     st.markdown("---")
     st.markdown("## 📊 Stats")
     stats = st.session_state.game.get_stats()
@@ -62,105 +76,94 @@ with st.sidebar:
     st.metric("Total Spins", stats["total_spins"])
     st.metric("Total Wins", stats["total_wins"])
     st.metric("Win Rate", f"{stats['win_rate']:.1f}%")
-
-    if st.button("🔄 Reset game", use_container_width=True):
+    
+    if st.button("🔄 Reset game"):
         st.session_state.game.reset()
         st.session_state.history = []
-        st.session_state.last_reels = ["🍒", "🍒", "🍒"]
-        st.session_state.last_bits = ["000", "000", "000"]
+        st.session_state.last_reels = ["🍒","🍒","🍒"]
         st.session_state.last_message = ""
         st.rerun()
 
-# -----------------------
-# Main UI: reels + controls
-# -----------------------
-st.markdown(f"## 💰 Credits: **{st.session_state.game.credits}**")
+st.markdown("<h1 style='text-align:center;'>⚛️ Quantum Slot Machine 🎰</h1>", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown(f"<div style='font-size:70px; text-align:center;'>{st.session_state.last_reels[0]}</div>", unsafe_allow_html=True)
-with col2:
-    st.markdown(f"<div style='font-size:70px; text-align:center;'>{st.session_state.last_reels[1]}</div>", unsafe_allow_html=True)
-with col3:
-    st.markdown(f"<div style='font-size:70px; text-align:center;'>{st.session_state.last_reels[2]}</div>", unsafe_allow_html=True)
+# spin button
+col_left, col_center, col_right = st.columns([1,2,1])
+with col_center:
+    spin_pressed = st.button("SPIN")
 
-if st.session_state.last_message:
-    st.success(st.session_state.last_message)
-if oracle_mode and st.session_state.last_bits != ["000", "000", "000"]:
-    # In oracle mode, bits are 1-bit strings, so display them clearly
-    st.info("Oracle Demo Mode is ON (win flag is shown after spin).")
-if oracle_mode and st.session_state.last_oracle_flag is not None:
-    st.info(f"Oracle flag (win qubit) = {st.session_state.last_oracle_flag}  (1 means WIN)")
-   
+#reel results
+col_r1, col_r2, col_r3 = st.columns(3)
+reel1 = col_r1.empty()
+reel2 = col_r2.empty()
+reel3 = col_r3.empty()
+message_placeholder = st.empty()
 
-spin = st.button(
-    "🎰 QUANTUM SPIN (10 credits)",
-    disabled=not st.session_state.game.can_spin(),
-    use_container_width=True,
-    type="primary"
-)
+# animation loop for reels spining
+def animate_reels(final_symbols, jackpot=False):
+    for i in range(10):
+        reel1.markdown(f"<div class='reel-card'>{all_symbols[i%len(all_symbols)]}</div>", unsafe_allow_html=True)
+        reel2.markdown(f"<div class='reel-card'>{all_symbols[(i+3)%len(all_symbols)]}</div>", unsafe_allow_html=True)
+        reel3.markdown(f"<div class='reel-card'>{all_symbols[(i+5)%len(all_symbols)]}</div>", unsafe_allow_html=True)
+        time.sleep(0.05)
+    
+    #final state display
+    cls = "reel-card jackpot" if jackpot else "reel-card"
+    reel1.markdown(f"<div class='{cls}'>{final_symbols[0]}</div>", unsafe_allow_html=True)
+    reel2.markdown(f"<div class='{cls}'>{final_symbols[1]}</div>", unsafe_allow_html=True)
+    reel3.markdown(f"<div class='{cls}'>{final_symbols[2]}</div>", unsafe_allow_html=True)
 
-if spin:
+# spin clicking mechanism
+if spin_pressed:
     if not st.session_state.game.place_bet():
-        st.warning("Not enough credits.")
+        st.session_state.last_message = "<div style='text-align:center;font-size:24px;color:red;'>Not enough credits!</div>"
     else:
+        # checking if we use Oracle (2 symbols) or Normal (8 symbols)
         if oracle_mode:
-            spin_result = quantum_slot.run_spin_with_oracle_demo(theta_base=theta_base, variation_pct=variation_pct)
-            st.session_state.last_oracle_flag = spin_result.oracle_flag
-            payout = quantum_slot.oracle_demo_payout(spin_result.oracle_flag)
-            win_type = "oracle_jackpot" if payout > 0 else "none"            
-
+            spin_result, win_type, payout = quantum_slot.run_spin_with_oracle_demo(angle_val, variation_pct)
         else:
-            spin_result = quantum_slot.run_spin(theta_base=theta_base, variation_pct=variation_pct)
-            st.session_state.last_oracle_flag = None
-
+            spin_result = quantum_slot.run_spin(angle_val, variation_pct)
             win_type, payout = quantum_slot.check_win(spin_result.reels)
 
-
-        # update state
+        # update balance and history
+        st.session_state.game.add_winnings(payout)
         st.session_state.last_reels = spin_result.reels
-        st.session_state.last_bits = spin_result.reel_bits
+        st.session_state.last_win_type = win_type
+        
+        # start the spinning reels
+        animate_reels(spin_result.reels, jackpot=(win_type=="triple"))
 
-        if payout > 0:
-            st.session_state.game.add_winnings(payout)
-            st.session_state.last_message = f"✅ {win_type.upper()} match! You won {payout} credits."
+        # colors and messages for the banner
+        if win_type == "triple":
+            msg = f"🎉 JACKPOT! You won {payout} credits! 🎉"
+            color = "gold"
+        elif win_type == "double":
+            msg = f"✅ You won {payout} credits! ({win_type.upper()})"
+            color = "#16a34a"
         else:
-            st.session_state.last_message = "❌ No match. Try again."
+            msg = "❌ No match, try again."
+            color = "#b91c1c"
+
+        st.session_state.last_message = f"<div style='text-align:center;font-size:32px;font-weight:bold;color:white;background:{color};padding:15px;border-radius:12px;'>{msg}</div>"
 
         st.session_state.history.append({
-            "spin": len(st.session_state.history) + 1,
+            "spin": len(st.session_state.history)+1,
             "reels": " ".join(spin_result.reels),
-            "bits": " ".join(spin_result.reel_bits),
             "win_type": win_type,
             "payout": payout,
-            "theta": round(theta_base, 2),
-            "variation_pct": variation_pct
+            #"angle": round(angle_val, 2)
         })
 
         st.rerun()
 
-st.markdown("---")
+# displaying reels and messages
+cls = "reel-card jackpot" if st.session_state.last_win_type=="triple" else "reel-card"
+reel1.markdown(f"<div class='{cls}'>{st.session_state.last_reels[0]}</div>", unsafe_allow_html=True)
+reel2.markdown(f"<div class='{cls}'>{st.session_state.last_reels[1]}</div>", unsafe_allow_html=True)
+reel3.markdown(f"<div class='{cls}'>{st.session_state.last_reels[2]}</div>", unsafe_allow_html=True)
+message_placeholder.markdown(st.session_state.last_message, unsafe_allow_html=True)
 
-# -----------------------
-# Analysis / History
-# -----------------------
+# history data display
 st.markdown("## 📜 Spin history")
-
 if st.session_state.history:
     df = pd.DataFrame(st.session_state.history).sort_values("spin", ascending=False)
-    st.dataframe(df, hide_index=True, use_container_width=True, height=320)
-
-    # Optional Plotly (won't crash if not installed)
-    with st.expander("📊 Quick plots"):
-        try:
-            import plotly.graph_objects as go
-
-            win_counts = df["win_type"].value_counts()
-            fig = go.Figure(data=[go.Pie(labels=win_counts.index, values=win_counts.values, hole=0.35)])
-            fig.update_layout(title="Win distribution")
-            st.plotly_chart(fig, use_container_width=True)
-
-        except ModuleNotFoundError:
-            st.info("Plotly not installed. Run: pip install plotly (optional).")
-else:
-    st.info("No spins yet.")
+    st.dataframe(df, hide_index=True, use_container_width=True)
