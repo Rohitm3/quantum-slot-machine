@@ -10,10 +10,48 @@ st.set_page_config(page_title="Quantum Slot Machine", page_icon="🎰", layout="
 
 st.markdown("""
 <style>
-#MainMenu {visibility:hidden;}
-footer {visibility:hidden;}
-header {visibility:hidden;}
+[data-testid="stAppDeployButton"] {
+    display: none !important;
+}
 
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+/* --- SPIN button: always red, hover adds yellow highlight --- */
+div[data-testid="stButton"] > button {
+    width: 100% !important;
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    padding: 14px 0 !important;
+    border-radius: 16px !important;
+    color: white !important;
+    background: #ff0000 !important;              
+    border: 2px solid rgba(255,255,255,0.18) !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+div[data-testid="stButton"] > button:hover,
+div[data-testid="stButton"] > button:focus,
+div[data-testid="stButton"] > button:active {
+    background: #ff0000 !important;              
+    border: 6px solid gold !important;           
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.25) !important;
+    opacity: 1 !important;
+    color: white !important;
+}
+
+/* --- Reel card styles --- */
 .reel-card {
     background: linear-gradient(145deg, #1f2933, #111827);
     border-radius: 16px;
@@ -26,22 +64,6 @@ header {visibility:hidden;}
 .jackpot { 
     box-shadow: 0 0 35px rgba(255,215,0,0.9) !important; 
     transform: scale(1.1);
-}
-
-.stButton>button {
-    font-size:48px; font-weight:900; text-transform:uppercase;
-    padding:25px 0; border-radius:25px;
-    border:6px solid gold; 
-    color: white !important; /* Force text to stay white */
-    background-color: red !important; /* Force background to stay red */
-    width:100%;
-}
-
-.stButton>button:active, .stButton>button:focus, .stButton>button:hover {
-    color: white !important;
-    background-color: #ff0000 !important;
-    border: 6px solid gold !important;
-    opacity: 1 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -87,9 +109,9 @@ with st.sidebar:
 st.markdown("<h1 style='text-align:center;'>⚛️ Quantum Slot Machine 🎰</h1>", unsafe_allow_html=True)
 
 # spin button
-col_left, col_center, col_right = st.columns([1,2,1])
+ccol_left, col_center, col_right = st.columns([2,6,2])
 with col_center:
-    spin_pressed = st.button("SPIN")
+    spin_pressed = st.button("SPIN", use_container_width=True)
 
 #reel results
 col_r1, col_r2, col_r3 = st.columns(3)

@@ -1,53 +1,90 @@
-# Quantum Slot Machine 🎰⚛️  
-A simple, interactive game that demonstrates core quantum computing concepts using Qiskit.
+# Quantum Slot Machine 🎰
 
-This project is designed as a beginner-friendly prototype for a university Quantum Computing final project (Industry grading scheme).  
-The goal is to show *real quantum concepts inside gameplay logic*, not just “random numbers”.
+An interactive slot machine game built using **quantum computing concepts**, designed as an educational prototype for the Quantum Computing course.
 
----
-
-## What the game does
-
-- You press **SPIN**
-- A **quantum circuit** runs (simulated with Qiskit Aer)
-- The circuit creates:
-  - **Superposition** using Hadamard gates (H)
-  - **Controlled probability bias** using rotation gates (RY(θ))
-  - **Optional correlations** between reels using entanglement (CNOT)
-- The circuit is **measured**, producing classical bits
-- Bits are mapped to slot symbols (🍒 🍋 ⭐ 💎 7️⃣ etc.)
-- Win detection and payout are handled in simple, transparent classical logic
+The game uses real quantum circuit logic (simulated via Qiskit) to generate slot outcomes, demonstrating ideas such as **superposition**, **probabilistic measurement**, and a simple **quantum oracle**.
 
 ---
 
-## Repo structure
+## Project Motivation
 
-quantum-slot-machine/
-│
-├── app/
-│ ├── app.py # Streamlit UI (main entry point)
-│ ├── quantum_logic.py # Qiskit circuits + symbol mapping
-│ ├── game_logic.py # Credits, bet handling, stats
-│
-├── assets/
-│ └── screenshots/ # Screenshots for report/presentation
-│
-├── report/ # Individual reports / abstract / notes
-│
-├── requirements.txt
-└── README.md
+This project was created to explore how quantum computing can be used **inside application logic**, rather than only for random number generation.
 
+By turning quantum concepts into a familiar game (a slot machine), the project aims to:
+- Make quantum mechanics more intuitive
+- Bridge theory and practical implementation
+- Provide a hands-on, interactive learning experience
 
 ---
 
-## Prerequisites
+## 🎮 How the Game Works (High Level)
 
-- Python **3.9+**
-- Git (optional, but recommended)
-- Works on **Windows** and **macOS**
+- Each **reel** of the slot machine is generated using a **quantum circuit**
+- Qubits are placed into **superposition**
+- Rotation gates control **probabilities**
+- Measurement collapses the quantum state into classical symbols
+- A **quantum oracle mode** demonstrates how a quantum circuit can flag winning states
 
-Check Python version:
-```bash
-python --version
-# or on macOS:
-python3 --version
+---
+
+## 🧠 Quantum Concepts Used
+
+### Superposition
+Each reel starts in a superposition of possible symbols.
+
+### Quantum Measurement
+When the circuit is measured, the superposition collapses into a concrete result.
+
+### Probability Control
+A rotation gate (RY) biases the probability distribution of outcomes.
+
+### Quantum Oracle (Demo Mode)
+In Oracle Demo Mode:
+- A special quantum circuit checks whether all reels match
+- An ancilla “flag” qubit is set to `1` if a winning condition is detected
+- This demonstrates how **oracles mark solutions without classical comparison**
+
+---
+
+## 🕹️ Controls Explained
+
+### Bias (θ)
+- Controls the probability distribution of outcomes
+- Higher values bias the result toward certain symbols
+
+### Variation (%)
+- Adds small random fluctuations to the bias
+- Simulates noise and uncertainty
+
+### Oracle Demo Mode
+- Enables a simplified quantum oracle
+- Winning states are detected directly in the quantum circuit
+
+### SPIN Button
+- Places a bet
+- Runs the quantum circuit
+- Displays the measured outcome
+
+---
+
+## 🧾 Project Structure
+
+.
+├── app.py              # Streamlit UI and game flow
+├── quantum_logic.py    # Quantum circuits and oracle logic
+├── game_logic.py       # Game state, credits, statistics
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
+
+
+## ▶️ How to Run the Project
+
+### Prerequisites
+- Python 3.9 or newer
+- pip (Python package manager)
+
+### 1. Install Dependencies
+From the project root directory, run:
+pip install -r requirements.txt
+
+Run the Streamlit app with: streamlit run app.py
