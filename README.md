@@ -67,14 +67,17 @@ In Oracle Demo Mode:
 
 ---
 
-## 🧾 Project Structure
+## File Structure
 
-.
-├── app.py              # Streamlit UI and game flow
-├── quantum_logic.py    # Quantum circuits and oracle logic
-├── game_logic.py       # Game state, credits, statistics
-├── requirements.txt    # Python dependencies
-└── README.md           # Project documentation
+- `quantum_slot_machine.py`  
+  Main application file containing the Streamlit user interface and game workflow.
+
+- `quantum_logic.py`  
+  Implements quantum circuits, oracle logic, and interaction with Qiskit.
+
+- `game_logic.py`  
+  Handles classical game state such as credits, bets, and statistics.
+
 
 
 ## ▶️ How to Run the Project
@@ -87,4 +90,4 @@ In Oracle Demo Mode:
 From the project root directory, run:
 pip install -r requirements.txt
 
-Run the Streamlit app with: streamlit run app.py
+Run the Streamlit app with: streamlit run quantum_slot_machine.py
