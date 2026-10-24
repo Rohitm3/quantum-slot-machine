@@ -62,7 +62,7 @@ Tests cover game credits and reset, payouts, measurement circuits, the oracle fl
 
 ## Contributors and attribution
 
-**Collaborative academic project** by Rohit Mohite and Afzonia, University of Basel. Both contributors should be acknowledged. The precise responsibility split can be expanded once both collaborators approve the wording.
+**Rohit Mohite and Afzonia** — collaborators on this academic coursework project for *Quantum Computation and Error Correction* at the University of Basel (2025–2026).
 
 This README reflects portfolio-preparation updates and should not be presented as the original submitted coursework documentation.
 
