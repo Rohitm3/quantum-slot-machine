@@ -36,7 +36,7 @@ class QuantumSlotMachine:
 
     def _get_quantum_random_bit(self) -> int:
        
-        #using QRNG (Quantum Random Number Generator)for true randomness
+        # Quantum random-bit sampling from a local Qiskit Aer simulator, not quantum hardware
         qrng_qc = QuantumCircuit(1, 1)
         qrng_qc.h(0) 
         qrng_qc.measure(0, 0)
@@ -109,28 +109,36 @@ class QuantumSlotMachine:
             return "double", base
         return "none", 0
 
-    def run_spin_with_oracle_demo(self, angle_val: float = math.pi/2, variation_pct: float = 0.0) -> SpinResult:
-      
-        #oracle Demo Mode: using 3 qubits (one per reel). Since there are 3 slots and 2 symbols
-       
+    def run_spin_with_oracle_demo(self, angle_val: float = math.pi / 2, variation_pct: float = 0.0) -> Tuple[SpinResult, str, int]:
+        """Run a three-reel oracle demonstration.
+
+        Each reel has one qubit (two symbols). Variation perturbs each reel's
+        RY angle, matching the slider behaviour of normal spin mode.
+        """
         qc = QuantumCircuit(4, 4)
+
         for q in range(3):
-            #qc.h(q)
-            qc.ry(angle_val, q)
+            theta = float(angle_val)
+            if variation_pct > 0:
+                direction = 1 if self._get_quantum_random_bit() else -1
+                delta = angle_val * (variation_pct / 100.0) * direction
+                theta = float(np.clip(angle_val + delta, 0.0, math.pi))
+            qc.ry(theta, q)
+
         qc.barrier(label="Reels")
-        # Toffoli Gate (CCX) logic to check if all reels match
+        # XOR each reel with reel 0, flag equality, then uncompute the XORs.
         qc.cx(0, 1)
         qc.cx(0, 2)
         qc.x(1)
         qc.x(2)
-        qc.ccx(1, 2, 3) 
+        qc.ccx(1, 2, 3)
         qc.x(1)
         qc.x(2)
         qc.cx(0, 1)
         qc.cx(0, 2)
         qc.barrier(label="Oracle")
         qc.measure(range(4), range(4))
-        
+
         job = self.backend.run(qc, shots=1, memory=True)
         raw = job.result().get_memory()[0]
         bitstring = raw[::-1]
@@ -138,4 +146,7 @@ class QuantumSlotMachine:
         reels = [self.oracle_symbols[int(b)] for b in reel_bits]
         oracle_flag = bitstring[3]
         win_type, payout = self.check_win(reels)
-        return SpinResult(reel_bits=reel_bits, reels=reels, circuit=qc, oracle_flag=oracle_flag), win_type, payout
+        return SpinResult(
+            reel_bits=reel_bits, reels=reels,
+            circuit=qc, oracle_flag=oracle_flag
+        ), win_type, payout
