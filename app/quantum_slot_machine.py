@@ -104,6 +104,7 @@ with st.sidebar:
         st.session_state.history = []
         st.session_state.last_reels = ["🍒","🍒","🍒"]
         st.session_state.last_message = ""
+        st.session_state.last_win_type = None
         st.rerun()
 
 st.markdown("<h1 style='text-align:center;'>⚛️ Quantum Slot Machine 🎰</h1>", unsafe_allow_html=True)

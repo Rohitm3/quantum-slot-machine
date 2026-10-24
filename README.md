@@ -1,93 +1,77 @@
 # Quantum Slot Machine 🎰
 
-An interactive slot machine game built using **quantum computing concepts**, designed as an educational prototype for the Quantum Computing course.
+An interactive **educational simulation** built with Python, Qiskit Aer and Streamlit for coursework in **Quantum Computation and Error Correction** at the University of Basel (2025–2026).
 
-The game uses real quantum circuit logic (simulated via Qiskit) to generate slot outcomes, demonstrating ideas such as **superposition**, **probabilistic measurement**, and a simple **quantum oracle**.
+This was a **collaborative student project**, not a commercial application. It runs quantum circuits on a **classical simulator**, not quantum hardware, and uses virtual game credits only.
 
----
+## Application preview
 
-## Project Motivation
+![Actual Quantum Slot Machine application screenshot](assets/Quantum%20Slot%20Machine%20%E2%80%94%20Actual%20Application%20Screenshot.png)
 
-This project was created to explore how quantum computing can be used **inside application logic**, rather than only for random number generation.
+*Actual screenshot of the Streamlit application running locally.*
 
-By turning quantum concepts into a familiar game (a slot machine), the project aims to:
-- Make quantum mechanics more intuitive
-- Bridge theory and practical implementation
-- Provide a hands-on, interactive learning experience
+## What it demonstrates
 
----
+- **Superposition:** Hadamard gates prepare possible measurement outcomes.
+- **Probability controls:** RY rotation angles influence the distribution of measured symbols.
+- **Entanglement:** CNOT gates connect selected qubits in normal spin mode.
+- **Measurement:** Three groups of three measured bits map to eight possible symbols per reel.
+- **Oracle demonstration:** A separate, simplified three-qubit reel circuit uses CNOT and CCX (Toffoli) gates with an ancilla flag to mark three matching outcomes; this mode uses two symbols per reel.
+- **Game state:** Bets, virtual credits, payouts, session statistics and spin history.
 
-## 🎮 How the Game Works (High Level)
+The **Bias (θ)** and **Variation (%)** controls affect reel rotations. Variation is sampled using a *simulated* quantum bit; this is not a claim of hardware-generated true randomness.
 
-- Each **reel** of the slot machine is generated using a **quantum circuit**
-- Qubits are placed into **superposition**
-- Rotation gates control **probabilities**
-- Measurement collapses the quantum state into classical symbols
-- A **quantum oracle mode** demonstrates how a quantum circuit can flag winning states
+## Project structure
 
----
+```text
+app/
+  quantum_slot_machine.py  # Streamlit user interface
+  quantum_logic.py         # Qiskit circuit building, simulation, payout checks
+  game_logic.py            # Virtual credits, bets and statistics
+tests/
+  test_slot_machine.py     # Basic regression and circuit checks
+requirements.txt
+requirements-dev.txt
+```
 
-## 🧠 Quantum Concepts Used
+## Run locally
 
-### Superposition
-Each reel starts in a superposition of possible symbols.
+Use a suitable Python 3 environment (the project was originally developed on Python 3.11).
 
-### Quantum Measurement
-When the circuit is measured, the superposition collapses into a concrete result.
+```bash
+git clone https://github.com/Rohitm3/quantum-slot-machine.git
+cd quantum-slot-machine
+python -m venv .venv
+# Activate .venv for your operating system
+python -m pip install -r requirements.txt
+python -m streamlit run app/quantum_slot_machine.py
+```
 
-### Probability Control
-A rotation gate (RY) biases the probability distribution of outcomes.
+If the repository is private, sign in to a GitHub account with access before cloning.
 
-### Quantum Oracle (Demo Mode)
-In Oracle Demo Mode:
-- A special quantum circuit checks whether all reels match
-- An ancilla “flag” qubit is set to `1` if a winning condition is detected
-- This demonstrates how **oracles mark solutions without classical comparison**
+## Run the tests
 
----
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
 
-## 🕹️ Controls Explained
+Tests cover game credits and reset, payouts, measurement circuits, the oracle flag, and controlled variation angles. Statistical output will vary between runs.
 
-### Bias (θ)
-- Controls the probability distribution of outcomes
-- Higher values bias the result toward certain symbols
+## Known limitations
 
-### Variation (%)
-- Adds small random fluctuations to the bias
-- Simulates noise and uncertainty
+- This is a teaching/demo application, not a scientifically validated quantum advantage experiment.
+- The Qiskit Aer backend is a *classical simulator*, not a quantum computer.
+- The oracle demo deliberately uses a reduced two-symbol representation.
+- The project currently has a basic local test suite; it has not undergone production security, accessibility or performance validation.
+- Dependency versions were not pinned in the original project; environment compatibility should be verified before a public release.
 
-### Oracle Demo Mode
-- Enables a simplified quantum oracle
-- Winning states are detected directly in the quantum circuit
+## Contributors and attribution
 
-### SPIN Button
-- Places a bet
-- Runs the quantum circuit
-- Displays the measured outcome
+**Rohit Mohite and Afzonia** — collaborators on this academic coursework project for *Quantum Computation and Error Correction* at the University of Basel (2025–2026).
 
----
+This README reflects portfolio-preparation updates and should not be presented as the original submitted coursework documentation.
 
-## File Structure
+## Reuse and licensing
 
-- `quantum_slot_machine.py`  
-  Main application file containing the Streamlit user interface and game workflow.
-
-- `quantum_logic.py`  
-  Implements quantum circuits, oracle logic, and interaction with Qiskit.
-
-- `game_logic.py`  
-  Handles classical game state such as credits, bets, and statistics.
-
-
-
-## ▶️ How to Run the Project
-
-### Prerequisites
-- Python 3.9 or newer
-- pip (Python package manager)
-
-### 1. Install Dependencies
-From the project root directory, run:
-pip install -r requirements.txt
-
-Run the Streamlit app with: streamlit run quantum_slot_machine.py
+No open-source license has been added. The project is available for viewing where repository permissions allow, but no general license to copy, redistribute or modify its code is granted. Please contact the contributors regarding reuse.
