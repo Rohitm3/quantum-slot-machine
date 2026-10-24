@@ -47,7 +47,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run app/quantum_slot_machine.py
 ```
 
-This repository is currently private while being prepared for portfolio publication. Use an authorized GitHub account to clone it.
+If the repository is private, sign in to a GitHub account with access before cloning.
 
 ## Run the tests
 
@@ -72,6 +72,6 @@ Tests cover game credits and reset, payouts, measurement circuits, the oracle fl
 
 This README reflects portfolio-preparation updates and should not be presented as the original submitted coursework documentation.
 
-## Publication status
+## Reuse and licensing
 
-The repository remains private while publication permissions, attribution, installation and test execution are confirmed. No open-source license is specified yet; please do not assume the absence of a license grants reuse rights.
+No open-source license has been added. The project is available for viewing where repository permissions allow, but no general license to copy, redistribute or modify its code is granted. Please contact the contributors regarding reuse.
