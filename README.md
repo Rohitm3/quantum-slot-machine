@@ -8,7 +8,7 @@ This was a **collaborative student project**, not a commercial application. It r
 
 ![Actual Quantum Slot Machine application screenshot](assets/Quantum%20Slot%20Machine%20%E2%80%94%20Actual%20Application%20Screenshot.png)
 
-*Actual screenshot of the Streamlit application running locally (Oracle Demo Mode).*
+*Actual screenshot of the Streamlit application running locally.*
 
 ## What it demonstrates
 
