@@ -4,6 +4,12 @@ An interactive **educational simulation** built with Python, Qiskit Aer and Stre
 
 This was a **collaborative student project**, not a commercial application. It runs quantum circuits on a **classical simulator**, not quantum hardware, and uses virtual game credits only.
 
+## Application preview
+
+![Actual Quantum Slot Machine application screenshot](assets/Quantum%20Slot%20Machine%20%E2%80%94%20Actual%20Application%20Screenshot.png)
+
+*Actual screenshot of the Streamlit application running locally (Oracle Demo Mode).*
+
 ## What it demonstrates
 
 - **Superposition:** Hadamard gates prepare possible measurement outcomes.
