@@ -1,0 +1,19 @@
+# Python bytecode and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+
+# Local test and development output
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.DS_Store
+.vscode/
+.idea/
+
+# Optional exports and scratch data
+*_export.csv
